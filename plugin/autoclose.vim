@@ -167,7 +167,7 @@ endf
 function! <SID>CloseStackPop(char) " ---{{{2
     "echom "pop"
     if(a:char == '')
-        pclose
+        silent! pclose
     endif
     if len(s:closeStack) == 0
         return <SID>JumpOut(a:char)
