@@ -51,20 +51,45 @@ endif
 
 
 let g:autoclose_loaded = 1
+let s:autoclose_mapped = 0
 let s:cotstate = &completeopt
-
-if !exists('g:autoclose_on')
-    let g:autoclose_on = 1
-endif
 
 " (Toggle) Mappings -----------------------------{{{1
 "
 nmap <Plug>ToggleAutoCloseMappings :call <SID>ToggleAutoCloseMappings()<CR>
 if (!hasmapto( '<Plug>ToggleAutoCloseMappings', 'n' ))
-    nmap <unique> <Leader>a <Plug>ToggleAutoCloseMappings
+    command AutoCloseToggle call <SID>ToggleAutoCloseMappings()
 endif
-fun! <SID>ToggleAutoCloseMappings() " --- {{{2
-    if g:autoclose_on
+fun! <SID>AutoCloseMappingsOn() " {{{2
+    inoremap <silent> " <C-R>=<SID>QuoteDelim('"')<CR>
+    inoremap <silent> ` <C-R>=<SID>QuoteDelim('`')<CR>
+    inoremap <silent> ' <C-R>=match(getline('.')[col('.') - 2],'\w') == 0 && getline('.')[col('.')-1] != "'" ? "'" : <SID>QuoteDelim("'")<CR>
+    inoremap <silent> ( (<C-R>=<SID>CloseStackPush(')')<CR>
+    inoremap <silent> ) <C-R>=<SID>CloseStackPop(')')<CR>
+    inoremap <silent> [ [<C-R>=<SID>CloseStackPush(']')<CR>
+    inoremap <silent> ] <C-R>=<SID>CloseStackPop(']')<CR>
+    inoremap <silent> < <<C-R>=<SID>CloseStackPush('>')<CR>
+    inoremap <silent> > <C-R>=<SID>CloseStackPop('>')<CR>
+    "inoremap <silent> { {<C-R>=<SID>CloseStackPush('}')<CR>
+    inoremap <silent> { <C-R>=<SID>OpenSpecial('{','}')<CR>
+    inoremap <silent> } <C-R>=<SID>CloseStackPop('}')<CR>
+    inoremap <silent> <BS> <C-R>=<SID>OpenCloseBackspaceOrDel("BS")<CR>
+    inoremap <silent> <C-h> <C-R>=<SID>OpenCloseBackspaceOrDel("BS")<CR>
+    inoremap <silent> <Del> <C-R>=<SID>OpenCloseBackspaceOrDel("Del")<CR>
+    inoremap <silent> <Esc> <C-R>=<SID>CloseStackPop('')<CR><Esc>
+    inoremap <silent> <C-[> <C-R>=<SID>CloseStackPop('')<CR><C-[>
+    "the following simply creates an ambiguous mapping so vim fully
+    "processes the escape sequence for terminal keys, see 'ttimeout' for a
+    "rough explanation, this just forces it to work
+    if &term[:4] == "xterm" || &term[:5] == 'screen'
+      inoremap <silent> <C-[>OC <RIGHT>
+    endif
+    let g:autoclose_on = 1
+    let s:autoclose_mapped = 1
+    echo "AutoClose On"
+endf
+fun! <SID>AutoCloseMappingsOff() " {{{2
+    if exists("g:autoclose_on") && s:autoclose_mapped
         iunmap "
         iunmap '
         iunmap (
@@ -80,37 +105,16 @@ fun! <SID>ToggleAutoCloseMappings() " --- {{{2
         iunmap `
         iunmap <
         iunmap >
-        let g:autoclose_on = 0
+        let s:autoclose_mapped = 0
         echo "AutoClose Off"
+    endif
+    let g:autoclose_on = 0
+endf
+fun! <SID>ToggleAutoCloseMappings() " --- {{{2
+    if exists("g:autoclose_on") && g:autoclose_on
+        call <SID>AutoCloseMappingsOff()
     else
-        inoremap <silent> " <C-R>=<SID>QuoteDelim('"')<CR>
-        inoremap <silent> ` <C-R>=<SID>QuoteDelim('`')<CR>
-        inoremap <silent> ' <C-R>=match(getline('.')[col('.') - 2],'\w') == 0 && getline('.')[col('.')-1] != "'" ? "'" : <SID>QuoteDelim("'")<CR>
-        inoremap <silent> ( (<C-R>=<SID>CloseStackPush(')')<CR>
-        inoremap <silent> ) <C-R>=<SID>CloseStackPop(')')<CR>
-        inoremap <silent> [ [<C-R>=<SID>CloseStackPush(']')<CR>
-        inoremap <silent> ] <C-R>=<SID>CloseStackPop(']')<CR>
-        inoremap <silent> < <<C-R>=<SID>CloseStackPush('>')<CR>
-        inoremap <silent> > <C-R>=<SID>CloseStackPop('>')<CR>
-        "inoremap <silent> { {<C-R>=<SID>CloseStackPush('}')<CR>
-        inoremap <silent> { <C-R>=<SID>OpenSpecial('{','}')<CR>
-        inoremap <silent> } <C-R>=<SID>CloseStackPop('}')<CR>
-        inoremap <silent> <BS> <C-R>=<SID>OpenCloseBackspaceOrDel("BS")<CR>
-        inoremap <silent> <C-h> <C-R>=<SID>OpenCloseBackspaceOrDel("BS")<CR>
-        inoremap <silent> <Del> <C-R>=<SID>OpenCloseBackspaceOrDel("Del")<CR>
-        inoremap <silent> <Esc> <C-R>=<SID>CloseStackPop('')<CR><Esc>
-        inoremap <silent> <C-[> <C-R>=<SID>CloseStackPop('')<CR><C-[>
-        "the following simply creates an ambiguous mapping so vim fully
-        "processes the escape sequence for terminal keys, see 'ttimeout' for a
-        "rough explanation, this just forces it to work
-        if &term[:4] == "xterm" || &term[:5] == 'screen'
-          inoremap <silent> <C-[>OC <RIGHT>
-        endif
-        let g:autoclose_on = 1
-        if a:0 == 0
-            "this if is so this message doesn't show up at load
-            echo "AutoClose On"
-        endif
+        call <SID>AutoCloseMappingsOn()
     endif
 endf
 let s:closeStack = []
@@ -256,9 +260,11 @@ function! <SID>OpenCloseBackspaceOrDel(map) " ---{{{2
 endf
 
 " Initialization ----------------------------------------{{{1
-if g:autoclose_on
-    let g:autoclose_on = 0
-    silent call <SID>ToggleAutoCloseMappings()
+if !exists('g:autoclose_on') || g:autoclose_on
+    silent call <SID>AutoCloseMappingsOn()
+else
+    silent call <SID>AutoCloseMappingsOff()
 endif
+
 " vim: set ft=vim ff=unix et sw=4 ts=4 :
 " vim600: set foldmethod=marker foldmarker={{{,}}} foldlevel=1 :
