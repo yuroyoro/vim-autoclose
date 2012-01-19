@@ -74,7 +74,7 @@ fun! <SID>AutoCloseMappingsOn() " {{{2
     inoremap <silent> { <C-R>=<SID>OpenSpecial('{','}')<CR>
     inoremap <silent> } <C-R>=<SID>CloseStackPop('}')<CR>
     inoremap <silent> <BS> <C-R>=<SID>OpenCloseBackspaceOrDel("BS")<CR>
-    inoremap <silent> <C-h> <C-R>=<SID>OpenCloseBackspaceOrDel("BS")<CR>
+    " inoremap <silent> <C-h> <C-R>=<SID>OpenCloseBackspaceOrDel("BS")<CR>
     inoremap <silent> <Del> <C-R>=<SID>OpenCloseBackspaceOrDel("Del")<CR>
     inoremap <silent> <Esc> <C-R>=<SID>CloseStackPop('')<CR><Esc>
     inoremap <silent> <C-[> <C-R>=<SID>CloseStackPop('')<CR><C-[>
@@ -90,23 +90,23 @@ fun! <SID>AutoCloseMappingsOn() " {{{2
 endf
 fun! <SID>AutoCloseMappingsOff() " {{{2
     if exists("g:autoclose_on") && s:autoclose_mapped
-        iunmap "
-        iunmap '
-        iunmap (
-        iunmap )
-        iunmap [
-        iunmap ]
-        iunmap {
-        iunmap }
-        iunmap <BS>
-        iunmap <C-h>
-        iunmap <Del>
-        iunmap <Esc>
-        iunmap `
-        iunmap <
-        iunmap >
-        let s:autoclose_mapped = 0
-        echo "AutoClose Off"
+      iunmap "
+      iunmap '
+      iunmap (
+      iunmap )
+      iunmap [
+      iunmap ]
+      iunmap {
+      iunmap }
+      iunmap <BS>
+      " iunmap <C-h>
+      iunmap <Del>
+      iunmap <Esc>
+      iunmap `
+      iunmap <
+      iunmap >
+      let s:autoclose_mapped = 0
+      echo "AutoClose Off"
     endif
     let g:autoclose_on = 0
 endf
