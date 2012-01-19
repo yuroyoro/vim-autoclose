@@ -68,8 +68,8 @@ fun! <SID>AutoCloseMappingsOn() " {{{2
     inoremap <silent> ) <C-R>=<SID>CloseStackPop(')')<CR>
     inoremap <silent> [ [<C-R>=<SID>CloseStackPush(']')<CR>
     inoremap <silent> ] <C-R>=<SID>CloseStackPop(']')<CR>
-    inoremap <silent> < <<C-R>=<SID>CloseStackPush('>')<CR>
-    inoremap <silent> > <C-R>=<SID>CloseStackPop('>')<CR>
+    " inoremap <silent> < <<C-R>=<SID>CloseStackPush('>')<CR>
+    " inoremap <silent> > <C-R>=<SID>CloseStackPop('>')<CR>
     "inoremap <silent> { {<C-R>=<SID>CloseStackPush('}')<CR>
     inoremap <silent> { <C-R>=<SID>OpenSpecial('{','}')<CR>
     inoremap <silent> } <C-R>=<SID>CloseStackPop('}')<CR>
@@ -103,8 +103,8 @@ fun! <SID>AutoCloseMappingsOff() " {{{2
       iunmap <Del>
       iunmap <Esc>
       iunmap `
-      iunmap <
-      iunmap >
+      " iunmap <
+      " iunmap >
       let s:autoclose_mapped = 0
       echo "AutoClose Off"
     endif
